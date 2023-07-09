@@ -52,14 +52,20 @@ def click_approve(driver, wait):
     print("----7")
     press_random_arrow_key(driver= driver)
     print("----11")
-    popup_window = wait.until(EC.number_of_windows_to_be(2))
+    num_windows = len(driver.window_handles)
+    if num_windows > 1:
+            driver.switch_to.window(driver.window_handles[1])
+    else:
+        popup_window = wait.until(EC.number_of_windows_to_be(2))
     driver.switch_to.window(driver.window_handles[1])
-
+    print("----12")
     # click Approve
     buttonPath = "//button[div[contains(@class, 'truncate')] and div[text()='Approve']]"
     wait.until(lambda d: d.find_element(By.XPATH, buttonPath))
+    print("----13")
     button = driver.find_element(By.XPATH, buttonPath)
     button.click()
+    print("----14")
 
 
 
