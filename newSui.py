@@ -12,9 +12,6 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 
 def unlock_wallet(driver, wait):
-    popup_window = wait.until(EC.number_of_windows_to_be(2))
-    driver.switch_to.window(driver.window_handles[1])
-
     # Find the password input element
     password_input = driver.find_element(By.NAME, 'password')
     # Enter the password into the input field
@@ -33,31 +30,48 @@ def unlock_wallet(driver, wait):
     button.click()
 
 
-def press_random_arrow_key(driver):
+def press_random_arrow_key(driver, index = 0):
     print("----8")
+    wait = WebDriverWait(driver, 5)
     clickable = driver.find_element(By.ID, "game")
     ActionChains(driver)\
         .context_click(clickable)
     print("----9")
     # Randomly select an arrow key
     arrow_keys = [Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT]
-    random_key = random.choice(arrow_keys)
+
+    if index >= len(arrow_keys):
+        return
+    
     # Perform the key press action
+    print(arrow_keys[index])
     actions = ActionChains(driver)
-    actions.send_keys(random_key).perform()
+    actions.send_keys(arrow_keys[index]).perform()
     print("----10")
+
+    num_windows = len(driver.window_handles)
+    try:
+        if num_windows > 1:
+                driver.switch_to.window(driver.window_handles[1])
+        else:
+            popup_window = wait.until(EC.number_of_windows_to_be(2))
+        driver.switch_to.window(driver.window_handles[1])
+        return
+    except:
+        press_random_arrow_key(driver= driver, index= (index + 1))
+
+
+
+def click_play(driver, wait):
+    buttonPath = "play-button.header-button"
+    wait.until(lambda d: d.find_element(By.CLASS_NAME, buttonPath))
+    button = driver.find_element(By.CLASS_NAME, buttonPath)
+    button.click()
 
 
 def click_approve(driver, wait):
     print("----7")
     press_random_arrow_key(driver= driver)
-    print("----11")
-    num_windows = len(driver.window_handles)
-    if num_windows > 1:
-            driver.switch_to.window(driver.window_handles[1])
-    else:
-        popup_window = wait.until(EC.number_of_windows_to_be(2))
-    driver.switch_to.window(driver.window_handles[1])
     print("----12")
     # click Approve
     buttonPath = "//button[div[contains(@class, 'truncate')] and div[text()='Approve']]"
@@ -111,26 +125,31 @@ def main():
 
     wait = WebDriverWait(driver, 20)
 
+    click_play(driver=driver, wait=wait)
+
     press_random_arrow_key(driver= driver)
 
     unlock_wallet(driver, wait)
     time.sleep(7)
     while True:
         # Get the number of open windows
+        
         num_windows = len(driver.window_handles)
         #  switch to main
         print("----1")
-        if num_windows > 1:
-            driver.switch_to.window(driver.window_handles[1])
-            driver.close()
-            print("----2")
+        # if num_windows > 1:
+        #     driver.switch_to.window(driver.window_handles[1])
+        #     time.sleep(1)
+        #     num_windows = len(driver.window_handles)
+        #     if num_windows > 1:
+        #         driver.close()
+        #     print("----2")
+        
         
         driver.switch_to.window(driver.window_handles[0])
         print("----4")
-        time.sleep(2)
         click_approve(driver, wait)
         print("----20")
-        time.sleep(1)
 
 
 if __name__ == "__main__":
